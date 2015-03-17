@@ -19,6 +19,9 @@ class MessageViewBuilder extends EntityViewBuilder {
    * {@inheritdoc}
    */
   public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
+    /**
+     * @var \Drupal\message\Entity\Message $entity;
+     */
     $build = parent::view($entity, $view_mode, $langcode);
 
     // Load the partials in the correct language.
@@ -33,20 +36,15 @@ class MessageViewBuilder extends EntityViewBuilder {
       }
     }
 
-    $extra = '';
-
     // Get the partials the user selected for the current view mode.
     $extra_fields = entity_get_display('message', $entity->bundle(), $view_mode);
-    foreach (array_keys($extra_fields->getComponents()) as $extra_fields) {
-      list(, $delta) = explode('_', $extra_fields);
-
-      $extra .= $partials[$langcode][$delta];
+    foreach ($extra_fields->getComponents() as $id => $extra_fields) {
+      list($prefix, $delta) = explode('_', $id);
+      if ($prefix == 'partial' && is_numeric($delta)) {
+        $build['partials'][$delta]['#markup'] = $entity->getText($langcode, array('delta' => $delta));
+      }
     }
 
-    $build = array(
-      '#markup' => $extra,
-    );
-
-    return ($build);
+    return $build;
   }
 }
