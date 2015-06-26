@@ -5,6 +5,7 @@
  * API functions to manipulate messages.
  */
 
+use Drupal\Core\Render\Element;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\message\Entity\Message;
 use Drupal\message\Entity\MessageType;
@@ -296,3 +297,27 @@ function message_theme() {
   );
 }
 
+
+/**
+ * Prepares variables for message templates.
+ *
+ * Default template: message.html.twig.
+ *
+ * Most themes use their own copy of message.html.twig. The default is located
+ * inside "/core/modules/message/templates/message.html.twig". Look in there for the
+ * full list of variables.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An array of elements to display in view mode.
+ *   - message: The message object.
+ */
+function template_preprocess_message(&$variables) {
+  $variables['message'] = $variables['elements']['#message'];
+
+  // Helpful $content variable for templates.
+  $variables += array('content' => array());
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
